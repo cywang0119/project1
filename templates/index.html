@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Todo App</title>
+</head>
+<body>
+    <form>
+        <input type = "text" name = "description">
+        <input type = "submit" value = "Create">
+    </form>
+
+    <ul id="todos">
+        {% for d in data %}
+        <li>{{d.description}}</li>
+        {% endfor %} <!--Jinja allows you to render non-HTML data to HTML -->
+    </ul>
+
+    <script>
+        document.getElementById('form').onsubmit = function(e) {
+        e.preventDefault();
+        fetch('/todos/create', {
+            method: 'Post',
+            body: Json.stringnify({
+            'description': document.getElementById('description').value
+            }),
+            headers: {
+            'Content-Tyoe': 'application/json'
+            }
+            }
+        )
+        // fetch is a promise based library. After implemeting fetch, 
+        // it will give back a promise by which we can use .then method
+        .then(function(response) {
+            return response.json()
+        })
+
+        .then(function(jsonResponse) {
+            console.log(jsonResponse);
+            const liItem = document.createElement('LI');
+            liItem.innerHTML = jsonResponse['description'];
+            document.getElementById('todos').appendChild(liItem);
+        })
+
+        }
+    </script>
+
+</body>
+</html>
