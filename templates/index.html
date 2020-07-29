@@ -5,9 +5,9 @@
     <title>Todo App</title>
 </head>
 <body>
-    <form>
-        <input type = "text" name = "description">
-        <input type = "submit" value = "Create">
+    <form id="form" method="post" action="/todos/create">
+        <input type = "text" id = "description" name="description"/>
+        <input type = "submit" value = "Create" />
     </form>
 
     <ul id="todos">
@@ -21,23 +21,24 @@
         e.preventDefault();
         fetch('/todos/create', {
             method: 'Post',
-            body: Json.stringnify({
+            body: JSON.stringify({
             'description': document.getElementById('description').value
             }),
             headers: {
-            'Content-Tyoe': 'application/json'
+            'Content-Type': 'application/json'
             }
             }
         )
         // fetch is a promise based library. After implemeting fetch, 
         // it will give back a promise by which we can use .then method
         .then(function(response) {
+            console.log('first', response);
             return response.json()
         })
 
         .then(function(jsonResponse) {
-            console.log(jsonResponse);
-            const liItem = document.createElement('LI');
+            console.log('response', jsonResponse);
+            const liItem = document.createElement('Li');
             liItem.innerHTML = jsonResponse['description'];
             document.getElementById('todos').appendChild(liItem);
         })
