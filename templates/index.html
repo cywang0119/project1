@@ -3,29 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <title>Todo App</title>
+    <style>
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            width: 200px;
+        }
+        li {
+            clear: both;
+        }
+        li button {
+            -webkit-appearance: none;
+            border: none;
+            outline: none;
+            color: blueviolet;
+            float:right;
+            cursor:pointer;
+            font-size: 18px;
+
+        }
+    </style>
 </head>
+
 <body>
-    <form>
-        <input type = "text" name = "description">
+    <form id="form" method="post" action="/todos/create">
+        <input type = "text" id = "description">
         <input type = "submit" value = "Create">
     </form>
 
     <ul id="todos">
         {% for d in data %}
-        <li>{{d.description}}</li>
+        <li><input class="check-completed" data-id="{{ d.id }}" type= "checkbox" {% if d.completed %} checked {% endif %}/>
+            {{d.description}}
+            <button class="delete-button" data-id="{{ d.id }}"> &cross;</button>
+        </li>
         {% endfor %} <!--Jinja allows you to render non-HTML data to HTML -->
     </ul>
 
     <script>
+        const deleteBtns = document.querySelectorAll('.delete-button');
+        for (let i = 0; i < deleteBtns.length; i++) {
+            const btn = deleteBtns[i];
+            btn.onclick = function(e) {
+            const todoId = e.target.dataset['id'];
+            fetch('/todos/' + todoId, {
+                method: 'DELETE'
+            });
+            }
+        }
+
+        const checkboxes = document.querySelectorAll('.check-completed');
+        for ( let i=0; i < checkboxes.length; i++) {
+            const checkbox = checkboxes[i];
+            checkbox.onchange = function(e) {
+                console.log('event', e)
+                const newCompleted = e.target.checked;
+                const todoId = e.target.dataset['id'];
+                fetch('/todos/'+ todoId + '/set-completed', { //get from above
+                    method:'POST',
+                    body: JSON.stringify({
+                        'completed': newCompleted // what about unchecked?
+                    }),
+                    headers: {
+                    'Content-Type': 'application/json'
+                    }
+                }
+                )
+            }
+        }
         document.getElementById('form').onsubmit = function(e) {
         e.preventDefault();
         fetch('/todos/create', {
-            method: 'Post',
-            body: Json.stringnify({
+            method: 'POST',
+            body: JSON.stringify({
             'description': document.getElementById('description').value
             }),
             headers: {
-            'Content-Tyoe': 'application/json'
+            'Content-Type': 'application/json'
             }
             }
         )
