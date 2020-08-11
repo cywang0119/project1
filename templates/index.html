@@ -1,47 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Todo App</title>
-    <style>
-        ul {
+    <head>
+        <title>Todo App</title>
+        <style>
+          .hidden {
+            display: none;
+          }
+          ul {
             list-style: none;
             padding: 0;
             margin: 0;
-            width: 200px;
-        }
-        li {
+            width: 300px;
+          }
+          li {
             clear: both;
-        }
-        li button {
+          }
+          li button {
             -webkit-appearance: none;
             border: none;
             outline: none;
-            color: blueviolet;
-            float:right;
-            cursor:pointer;
-            font-size: 18px;
+            color: red;
+            float: right;
+            cursor: pointer;
+            font-size: 20px;
+          }
+          .lists-wrapper, .todos-wrapper {
+            display: inline-block;
+            vertical-align: top;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="lists-wrapper">
+          <ul id="lists">
+            {% for list in lists %}
+            <li>
+              <a href="/lists/{{ list.id }}">
+                {{ list.name }}
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="todos-wrapper">
+          <h4>{{ active_lists.name }}</h4>
+          <form id="form">
+            <input type="text" id="description" name="description" />
+            <input type="submit" value="Create" />
+          </form>
+          <div id="error" class="hidden">Something went wrong!</div>
+          <ul id="todos">
+            {% for todo in todos %}
+            <li>
+              <input class="check-completed" data-id="{{ todo.id }}" type="checkbox" {% if todo.completed %} checked {% endif %} />
+              {{ todo.description }}
+              <button class="delete-button" data-id="{{ todo.id }}">&cross;</button>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
 
-        }
-    </style>
-</head>
-
-<body>
-    <form id="form" method="post" action="/todos/create">
-        <input type = "text" id = "description">
-        <input type = "submit" value = "Create">
-    </form>
-
-    <ul id="todos">
-        {% for d in data %}
-        <li><input class="check-completed" data-id="{{ d.id }}" type= "checkbox" {% if d.completed %} checked {% endif %}/>
-            {{d.description}}
-            <button class="delete-button" data-id="{{ d.id }}"> &cross;</button>
-        </li>
-        {% endfor %} <!--Jinja allows you to render non-HTML data to HTML -->
-    </ul>
-
-    <script>
+        <script>
         const deleteBtns = document.querySelectorAll('.delete-button');
         for (let i = 0; i < deleteBtns.length; i++) {
             const btn = deleteBtns[i];
@@ -49,7 +68,11 @@
             const todoId = e.target.dataset['id'];
             fetch('/todos/' + todoId, {
                 method: 'DELETE'
-            });
+            })
+            .then(function() {
+            const item = e.target.parentElement;
+            item.remove();
+          })
             }
         }
 
